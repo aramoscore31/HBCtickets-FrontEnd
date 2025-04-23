@@ -6,6 +6,7 @@ import { FontAwesome } from '@expo/vector-icons';
 
 const OrganizerRequestScreen = ({ navigation }: any) => {
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [reason, setReason] = useState('');
   const [experience, setExperience] = useState('');
   const [selectedEventTypes, setSelectedEventTypes] = useState<string[]>([]);
@@ -27,7 +28,7 @@ const OrganizerRequestScreen = ({ navigation }: any) => {
   };
 
   const handleRequestOrganizer = async () => {
-    if (!username || !reason || !experience || selectedEventTypes.length === 0) {
+    if (!username || !email || !reason || !experience || selectedEventTypes.length === 0) {
       setFormError('Por favor completa todos los campos.');
       return;
     }
@@ -49,6 +50,7 @@ const OrganizerRequestScreen = ({ navigation }: any) => {
         },
         body: JSON.stringify({
           username,
+          email,
           reason,
           experience,
           eventTypes: selectedEventTypes,
@@ -58,6 +60,7 @@ const OrganizerRequestScreen = ({ navigation }: any) => {
       if (response.ok) {
         setSuccess(true);
         setUsername('');
+        setEmail('');
         setReason('');
         setExperience('');
         setSelectedEventTypes([]);
@@ -67,7 +70,6 @@ const OrganizerRequestScreen = ({ navigation }: any) => {
       }
 
     } catch (err) {
-      Alert.alert('Error', err.message || 'Hubo un problema al enviar tu solicitud.');
     }
   };
 
@@ -91,6 +93,13 @@ const OrganizerRequestScreen = ({ navigation }: any) => {
         placeholder="Nombre de usuario"
         value={username}
         onChangeText={setUsername}
+        placeholderTextColor="#A0A0A0"
+      />
+      <TextInput
+        style={[styles.input, !email && styles.inputError]}
+        placeholder="Correo electrónico"
+        value={email}
+        onChangeText={setEmail}
         placeholderTextColor="#A0A0A0"
       />
       <TextInput
@@ -155,8 +164,8 @@ const OrganizerRequestScreen = ({ navigation }: any) => {
         <Text style={styles.buttonText}>Solicitar ser organizador</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-        <Text>Volver</Text>
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.button}>
+        <Text style={styles.buttonText}>Volver</Text>
       </TouchableOpacity>
     </ScrollView>
   );

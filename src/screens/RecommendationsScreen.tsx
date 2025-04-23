@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Image, TextInput } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -27,7 +27,7 @@ const RecommendationsScreen = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'Home'>>();
   const [localizacion, setLocalizacion] = useState('');
   const [events, setEvents] = useState<EventData[]>([]);
-  const [favorites, setFavorites] = useState<number[]>([]);
+  const [favorites, setFavorites] = useState<number[]>([]);  // Lista de eventos favoritos
   const [loadingEvents, setLoadingEvents] = useState(false);
   const [showLocationTitle, setShowLocationTitle] = useState(false);
   const [noEventsMessage, setNoEventsMessage] = useState('');
@@ -35,6 +35,7 @@ const RecommendationsScreen = () => {
   const [role, setRole] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
 
+  // Fetch events from the server
   const fetchAllEvents = async () => {
     setLoadingEvents(true);
     try {
@@ -62,10 +63,12 @@ const RecommendationsScreen = () => {
     }
   };
 
+  // Navigate to event details screen
   const handleEventPress = (item: EventData) => {
     navigation.navigate('EventDetails', { event: item });
   };
 
+  // Fetch events filtered by location
   const fetchEventsByLocation = async (localization: string) => {
     setLoadingEvents(true);
     setShowLocationTitle(true);
@@ -98,6 +101,7 @@ const RecommendationsScreen = () => {
     }
   };
 
+  // Fetch the favorites list from the backend
   const fetchFavorites = async () => {
     const token = await AsyncStorage.getItem('token');
     try {
@@ -108,13 +112,14 @@ const RecommendationsScreen = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        setFavorites(data.map((event: any) => event.id));
+        setFavorites(data); // Set the IDs of favorite events
       }
     } catch (error) {
       console.error('Error al obtener favoritos:', error);
     }
   };
 
+  // Add an event to favorites
   const handleAddFavorite = async (eventId: any) => {
     const token = await AsyncStorage.getItem('token');
     try {
@@ -129,6 +134,7 @@ const RecommendationsScreen = () => {
     }
   };
 
+  // Remove an event from favorites
   const handleRemoveFavorite = async (eventId: any) => {
     const token = await AsyncStorage.getItem('token');
     try {
@@ -143,6 +149,7 @@ const RecommendationsScreen = () => {
     }
   };
 
+  // Initialize user data
   useEffect(() => {
     const getUserData = async () => {
       const storedUsername = await AsyncStorage.getItem('username');
@@ -153,18 +160,20 @@ const RecommendationsScreen = () => {
     getUserData();
   }, []);
 
+  // Fetch the favorites and events when the screen is loaded
   useEffect(() => {
     fetchFavorites();
     fetchAllEvents();
   }, []);
 
+  // Format date in readable format
   const formatDate = (date: string) => {
     const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
     return new Date(date).toLocaleDateString('es-ES', options);
   };
 
   return (
-    <View style={CiudadStyles.container}>
+    <View style={CiudadStyles.container} >
       <Header navigation={navigation} username={username || ''} />
 
       <Text style={CiudadStyles.text}>Filtrar por localización</Text>
@@ -233,7 +242,7 @@ const RecommendationsScreen = () => {
             data={events}
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => {
-              const isFavorite = favorites.includes(item.id);
+              const isFavorite = favorites.includes(item.id);  // Verifica si el evento está en los favoritos
               return (
                 <TouchableOpacity onPress={() => handleEventPress(item)}>
                   <View style={CiudadStyles.event}>
@@ -265,9 +274,9 @@ const RecommendationsScreen = () => {
                     <TouchableOpacity
                       onPress={() => {
                         if (isFavorite) {
-                          handleRemoveFavorite(item.id);
+                          handleRemoveFavorite(item.id);  // Eliminar de favoritos
                         } else {
-                          handleAddFavorite(item.id);
+                          handleAddFavorite(item.id);  // Agregar a favoritos
                         }
                       }}
                       style={CiudadStyles.favoriteIcon}

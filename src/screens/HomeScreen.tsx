@@ -5,10 +5,9 @@ import {
   Image,
   FlatList,
   TouchableOpacity,
-  ActivityIndicator,
+  Animated,
   Dimensions,
   TextInput,
-  Animated,
 } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -20,6 +19,7 @@ import Carousel from 'react-native-reanimated-carousel';
 import { useFocusEffect } from '@react-navigation/native';
 import BottomNav from '../components/BottomNav';
 import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -74,21 +74,24 @@ const HomeScreen = () => {
 
   const opacity = useState(new Animated.Value(1))[0];
 
+  // Fetch events and categories
   const fetchEvents = async () => {
     try {
       const response = await fetch('http://192.168.1.87:8080/api/events/filter/bypopular');
       if (!response.ok) throw new Error('No se pudieron obtener los eventos.');
 
       const data: EventData[] = await response.json();
-      setEvents(data);
-      setFilteredEvents(data);
 
-      const culturalEvents = data.filter(event => event.categories.some(cat => cat.name.toLowerCase() === 'cultura'));
+      const currentDate = new Date();
+      const upcomingEvents = data.filter((event) => new Date(event.date) > currentDate);
+      setEvents(upcomingEvents);
+      setFilteredEvents(upcomingEvents);
+
+      const culturalEvents = upcomingEvents.filter(event => event.categories.some(cat => cat.name.toLowerCase() === 'cultura'));
       setCulturalEvents(culturalEvents);
 
-      const lastTickets = data.filter(event => event.availableTickets < 100);
+      const lastTickets = upcomingEvents.filter(event => event.availableTickets < 100);
       setLastTicketsEvents(lastTickets);
-
     } catch (err) {
       console.error('Error al obtener eventos:', err);
     } finally {
@@ -101,7 +104,10 @@ const HomeScreen = () => {
       const response = await fetch('http://192.168.1.87:8080/api/events/filter/bydate');
       if (!response.ok) throw new Error('No se pudieron obtener los eventos próximos.');
       const data: EventData[] = await response.json();
-      setUpcomingEvents(data);
+
+      const currentDate = new Date();
+      const upcomingEvents = data.filter(event => new Date(event.date) > currentDate);
+      setUpcomingEvents(upcomingEvents);
     } catch (err) {
       console.error('Error al obtener eventos próximos:', err);
     }
@@ -151,7 +157,7 @@ const HomeScreen = () => {
   const startBlinking = () => {
     Animated.loop(
       Animated.sequence([
-        Animated.timing(opacity, { toValue: 0.7, duration: 1000, useNativeDriver: true }),
+        Animated.timing(opacity, { toValue: 0.5, duration: 1000, useNativeDriver: true }),
         Animated.timing(opacity, { toValue: 1, duration: 1000, useNativeDriver: true }),
       ])
     ).start();
@@ -219,16 +225,24 @@ const HomeScreen = () => {
               horizontal={true}
               showsHorizontalScrollIndicator={false}
               renderItem={({ item }) => (
-                <TouchableOpacity style={styles.eventBannerItem} onPress={handleEventPress(item)}>
-                  <Animated.View style={[styles.eventBannerImage, { opacity }]}>
+                <TouchableOpacity style={styles.upcomingEvent} onPress={handleEventPress(item)}>
+                  {/* Apply the blinking animation here */}
+                  <Animated.View style={[styles.upcomingEvent, { opacity }]}>
                     <Image
-                      source={{ uri: `http://192.168.1.87:8080/uploaded-images/${item.imageUrl}` }}
-                      style={styles.eventBannerImage}
+                      source={{
+                        uri: `http://192.168.1.87:8080/uploaded-images/${item.imageUrl}`,
+                      }}
+                      style={styles.upcomingEventImage}
                     />
+                    <Text style={styles.upcomingEventTitle}>{item.title}</Text>
+                    <View style={styles.upcomingEventTimeContainer}>
+                      <FontAwesome name="clock-o" size={16} color="#FF6347" />
+                      <Text style={styles.upcomingEventTime}>{formatEventTime(item.date)}</Text>
+                    </View>
                   </Animated.View>
-                  <Text style={styles.eventBannerTitle}>{item.title}</Text>
                 </TouchableOpacity>
-              )} />
+              )}
+            />
 
             <Text style={styles.sectionTitle}>Eventos Más Próximos</Text>
             <FlatList
@@ -246,11 +260,11 @@ const HomeScreen = () => {
                   <View style={styles.upcomingEventTimeContainer}>
                     <FontAwesome name="clock-o" size={16} color="#FF6347" />
                     <Text style={styles.upcomingEventTime}>{formatEventTime(item.date)}</Text>
-
                   </View>
                 </TouchableOpacity>
               )}
             />
+
             <Text style={styles.sectionTitle}>Cultura</Text>
             <FlatList
               data={culturalEvents}
@@ -258,18 +272,24 @@ const HomeScreen = () => {
               horizontal={true}
               showsHorizontalScrollIndicator={false}
               renderItem={({ item }) => (
-                <TouchableOpacity style={styles.culturalEvent} onPress={handleEventPress(item)}>
+                <TouchableOpacity style={styles.upcomingEvent} onPress={handleEventPress(item)}>
                   <Image
-                    source={{ uri: `http://192.168.1.87:8080/uploaded-images/${item.imageUrl}` }}
-                    style={styles.culturalEventImage}
+                    source={{
+                      uri: `http://192.168.1.87:8080/uploaded-images/${item.imageUrl}`,
+                    }}
+                    style={styles.upcomingEventImage}
                   />
-                  <Text style={styles.culturalEventTitle}>{item.title}</Text>
-                  <Text style={styles.culturalEventLocation}>{item.localizacion}</Text>
-                  <View style={{ height: 100 }} />
-
+                  <Text style={styles.upcomingEventTitle}>{item.title}</Text>
+                  <View style={styles.culturalEventLocation}>
+                    <FontAwesome name="map-marker" size={14} color="#888" style={styles.locationIcon} />
+                    <Text style={styles.culturalEventLocationText}>{item.localizacion}</Text>
+                  </View>
                 </TouchableOpacity>
               )}
             />
+          <View style={{ height: 430 }} >
+            <Footer />
+          </View>
           </>
         }
       />

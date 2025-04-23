@@ -21,6 +21,7 @@ import { styles } from '../css/EventDetailsStyles';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import BottomNav from '../components/BottomNav';
+import Footer from '../components/Footer';
 
 type Category = {
   id: string;
@@ -286,7 +287,8 @@ const EventDetails = ({ route }: any) => {
             </TouchableOpacity>
           </View>
         </View>
-        <View style={{ height: 120 }} />
+        <Footer />
+        <View style={{ height: 50 }} />
       </ScrollView>
       <BottomNav navigation={navigation} role={role || ''} />
     </View>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Image, Alert } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -14,27 +14,39 @@ const CategoriasScreen = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'Home'>>();
   const [categories, setCategories] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
-  const [favorites, setFavorites] = useState<any[]>([]);
+  const [favorites, setFavorites] = useState<any[]>([]);  // Lista de eventos favoritos
   const [loading, setLoading] = useState(true);
-  const [selectedCategories, setSelectedCategories] = useState<any[]>([]);  // Lista de categorías seleccionadas
+  const [selectedCategories, setSelectedCategories] = useState<any[]>([]);  // Categorías seleccionadas
   const [noCategoriesMessage, setNoCategoriesMessage] = useState('');
   const [noEventsMessage, setNoEventsMessage] = useState('');
-  const [username, setUsername] = useState<string | null>(null);
-  const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCategories();
     fetchEvents();
-    fetchFavorites();
-    const getUserData = async () => {
-      const storedUsername = await AsyncStorage.getItem('username');
-      const storedRole = await AsyncStorage.getItem('role');
-      if (storedUsername) setUsername(storedUsername);
-      if (storedRole) setRole(storedRole);
-    };
-    getUserData();
+    loadFavorites();  // Cargar favoritos al inicio
   }, []);
 
+  // Función para cargar los favoritos desde el backend
+  const loadFavorites = async () => {
+    const token = await AsyncStorage.getItem('token');
+    try {
+      const response = await fetch('http://192.168.1.87:8080/api/events/favorites/list', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setFavorites(data);  // Guardamos los IDs de los eventos favoritos
+      } else {
+        console.error('Error al cargar favoritos:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error al obtener los favoritos:', error);
+    }
+  };
+
+  // Función para cargar las categorías
   const fetchCategories = async () => {
     try {
       const response = await fetch('http://192.168.1.87:8080/api/categories');
@@ -50,13 +62,22 @@ const CategoriasScreen = () => {
     }
   };
 
+  // Función para cargar los eventos
   const fetchEvents = async () => {
     setLoading(true);
     try {
       const response = await fetch('http://192.168.1.87:8080/api/events/filter/bydate');
       if (response.ok) {
         const data = await response.json();
-        setEvents(data);
+        const simplifiedEvents = data.map((event: any) => ({
+          id: event.id,
+          title: event.title,
+          imageUrl: event.imageUrl,
+          availableTickets: event.availableTickets,
+          localizacion: event.localizacion,
+          date: event.date,
+        }));
+        setEvents(simplifiedEvents);
       } else {
         setNoEventsMessage('No se pudieron cargar los eventos.');
       }
@@ -68,23 +89,7 @@ const CategoriasScreen = () => {
     }
   };
 
-  const fetchFavorites = async () => {
-    const token = await AsyncStorage.getItem('token');
-    try {
-      const response = await fetch('http://192.168.1.87:8080/api/events/favorites/list', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setFavorites(data.map((event: any) => event.id));
-      }
-    } catch (error) {
-      console.error('Error al obtener favoritos:', error);
-    }
-  };
-
+  // Función para seleccionar las categorías
   const handleCategorySelect = (category: any) => {
     if (selectedCategories.includes(category.id)) {
       setSelectedCategories(selectedCategories.filter(id => id !== category.id));
@@ -93,18 +98,80 @@ const CategoriasScreen = () => {
     }
   };
 
+  // Función para manejar la adición de favoritos
+  const handleAddFavorite = async (eventId: string) => {
+    const token = await AsyncStorage.getItem('token');
+    if (!token) {
+      Alert.alert('Error', 'No estás logueado. Por favor, inicia sesión.');
+      navigation.navigate('Login');
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://192.168.1.87:8080/api/events/favorites/add/${eventId}`, {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json' 
+        },
+      });
+
+      if (!response.ok) {
+        const errorDetails = await response.json();
+        throw new Error(`Error al agregar a favoritos: ${errorDetails.message || 'Error desconocido'}`);
+      }
+
+      const updatedFavorites = [...favorites, eventId];
+      setFavorites(updatedFavorites);  // Actualizamos los favoritos
+    } catch (err) {
+      console.error('Error al agregar a favoritos:', err);
+      Alert.alert('No se pudo agregar el evento a favoritos.');
+    }
+  };
+
+  // Función para manejar la eliminación de favoritos
+  const handleRemoveFavorite = async (eventId: string) => {
+    const token = await AsyncStorage.getItem('token');
+    if (!token) {
+      Alert.alert('Error', 'No estás logueado. Por favor, inicia sesión.');
+      navigation.navigate('Login');
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://192.168.1.87:8080/api/events/favorites/remove/${eventId}`, {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json' 
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to remove favorite');
+      }
+
+      const updatedFavorites = favorites.filter((id) => id !== eventId);
+      setFavorites(updatedFavorites);  // Actualizamos los favoritos
+    } catch (err) {
+      console.error('Error al eliminar de favoritos:', err);
+      Alert.alert('No se pudo eliminar el evento de favoritos.');
+    }
+  };
+
+  // Filtrar eventos por categorías seleccionadas
   const filterEventsByCategories = () => {
     if (selectedCategories.length === 0) {
       return events;
     }
     return events.filter((event) =>
-      event.categories.some((category: { id: number }) => selectedCategories.includes(category.id))
+      event.categories?.some((category: { id: number }) => selectedCategories.includes(category.id))
     );
   };
 
   return (
     <View style={CategoriasStyles.container}>
-      <Header navigation={navigation} username={username || ''} />
+      <Header navigation={navigation} username ={""}/>
       {loading ? (
         <ActivityIndicator size="large" color="#3498db" style={CategoriasStyles.loadingContainer} />
       ) : (
@@ -112,27 +179,26 @@ const CategoriasScreen = () => {
           {noCategoriesMessage && <Text style={CategoriasStyles.noCategoriesMessage}>{noCategoriesMessage}</Text>}
 
           <View style={CategoriasStyles.categoriesContainer}>
-  {categories.map((category) => (
-    <TouchableOpacity
-      key={category.id}
-      style={[
-        CategoriasStyles.categoryButton,
-        selectedCategories.includes(category.id) && CategoriasStyles.selectedCategory,
-      ]}
-      onPress={() => handleCategorySelect(category)}
-    >
-      <Text
-        style={[
-          CategoriasStyles.categoryButtonText,
-          selectedCategories.includes(category.id) && CategoriasStyles.categoryButtonTextSelected,
-        ]}
-      >
-        {category.name}
-      </Text>
-    </TouchableOpacity>
-  ))}
-</View>
-
+            {categories.map((category) => (
+              <TouchableOpacity
+                key={category.id}
+                style={[
+                  CategoriasStyles.categoryButton,
+                  selectedCategories.includes(category.id) && CategoriasStyles.selectedCategory,
+                ]}
+                onPress={() => handleCategorySelect(category)}
+              >
+                <Text
+                  style={[
+                    CategoriasStyles.categoryButtonText,
+                    selectedCategories.includes(category.id) && CategoriasStyles.categoryButtonTextSelected,
+                  ]}
+                >
+                  {category.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
 
           <Text style={CategoriasStyles.sectionTitle}>Eventos Disponibles</Text>
           {noEventsMessage && <Text style={CategoriasStyles.noCategoriesMessage}>{noEventsMessage}</Text>}
@@ -141,7 +207,7 @@ const CategoriasScreen = () => {
             data={filterEventsByCategories()}
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => {
-              const isFavorite = favorites.includes(item.id);
+              const isFavorite = favorites.includes(item.id);  // Verifica si el evento está en los favoritos
               const formattedDate = new Date(item.date).toLocaleDateString();
               return (
                 <View style={ComingSoonStyles.event}>
@@ -168,13 +234,19 @@ const CategoriasScreen = () => {
                     </View>
                   </View>
                   <TouchableOpacity
-                   
+                    onPress={() => {
+                      if (isFavorite) {
+                        handleRemoveFavorite(item.id);  // Eliminar de favoritos
+                      } else {
+                        handleAddFavorite(item.id);  // Agregar a favoritos
+                      }
+                    }}
                     style={ComingSoonStyles.favoriteIcon}
                   >
                     <FontAwesome
                       name="star"
                       size={25}
-                      color={isFavorite ? ComingSoonStyles.favoriteIconActive.color : ComingSoonStyles.favoriteIconInactive.color}
+                      color={isFavorite ? 'gold' : 'gray'}  // Estrella dorada si es favorito
                     />
                   </TouchableOpacity>
                 </View>
@@ -183,7 +255,7 @@ const CategoriasScreen = () => {
           />
         </>
       )}
-      <BottomNav navigation={navigation} role={role || ''} />
+      <BottomNav navigation={navigation} role={''} />
     </View>
   );
 };

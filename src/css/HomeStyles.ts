@@ -6,7 +6,7 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
-    position: 'relative'
+    position: 'relative',
   },
   fixedHeader: {
     position: 'absolute',
@@ -29,33 +29,62 @@ export const styles = StyleSheet.create({
     zIndex: 100,
   },
 
-  culturalEvent: {
-    width: 180,
-    marginHorizontal: 10,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.5,
-    elevation: 5,
-    padding: 10,
-  },
 
-  culturalEventImage: {
-    width: '100%',
-    height: 150,
-    resizeMode: 'cover',
-    borderRadius: 8,
-  },
+culturalEvent: {
+  width: 170, 
+  height: 300,
+  marginRight: 15, 
+  backgroundColor: '#ffffff', 
+  borderRadius: 12, 
+  shadowColor: '#000', 
+  shadowOffset: { width: 0, height: 6 }, 
+  shadowOpacity: 0.2, 
+  shadowRadius: 8, 
+  elevation: 4, 
+  padding: 12, 
+  justifyContent: 'center', 
+  alignItems: 'center', 
+  overflow: 'hidden', 
+},
 
-  culturalEventTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginTop: 10,
-    textAlign: 'center',
-    color: '#333',
-  },
+culturalEventImage: {
+  width: '100%',
+  height: 200,
+  resizeMode: 'cover', 
+  borderRadius: 12,
+  marginBottom: 12,
+  marginTop: 110, 
+  opacity: 0.9, 
+},
+
+
+culturalEventTitle: {
+  fontSize: 22, 
+  fontWeight: 'bold', 
+  fontFamily: 'Arial, sans-serif', 
+  color: '#333', 
+  textAlign: 'center', 
+  marginTop: 12, 
+  marginBottom: 10, 
+},
+culturalEventLocation: {
+  flexDirection: 'row', 
+  alignItems: 'center', 
+  marginTop: 5, 
+},
+
+locationIcon: {
+  marginRight: 5, 
+  color: '#FF6347', 
+  fontSize: 16,
+},
+
+culturalEventLocationText: {
+  fontSize: 14, 
+  color: '#3498db', 
+  fontWeight: 'bold', },
+
+ 
 
   sectionTitle: {
     fontSize: 22,
@@ -71,7 +100,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 10,
-    backgroundColor: '#3498db'
+    backgroundColor: '#3498db',
   },
   headerIcons: { flexDirection: 'row', gap: 15 },
   logo: { width: 90, height: 50, resizeMode: 'contain' },
@@ -105,7 +134,7 @@ export const styles = StyleSheet.create({
   featuredImage: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover'
+    resizeMode: 'cover',
   },
   recommendationBar: {
     flexDirection: 'row',
@@ -117,9 +146,7 @@ export const styles = StyleSheet.create({
     borderTopColor: '#ddd',
   },
 
-  recommendationButton: {
-
-  },
+  recommendationButton: {},
 
   recommendationButtonText: {
     color: 'white',
@@ -127,9 +154,6 @@ export const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
-
-
-
 
   eventList: {
     paddingHorizontal: 0,
@@ -162,17 +186,24 @@ export const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)'
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
     backgroundColor: 'white',
     padding: 20,
     borderRadius: 10,
     width: 300,
-    alignItems: 'center'
+    alignItems: 'center',
   },
   modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 15 },
-  modalButton: { backgroundColor: '#3498db', padding: 10, width: '100%', borderRadius: 5, marginBottom: 10, alignItems: 'center' },
+  modalButton: {
+    backgroundColor: '#3498db',
+    padding: 10,
+    width: '100%',
+    borderRadius: 5,
+    marginBottom: 10,
+    alignItems: 'center',
+  },
   modalButtonText: { color: 'white', fontSize: 16 },
   modalClose: { marginTop: 10 },
   modalCloseText: { color: 'red', fontSize: 16 },
@@ -235,7 +266,6 @@ export const styles = StyleSheet.create({
     right: 20,
     zIndex: 2,
     alignItems: 'center',
-
   },
 
   overlayText: {
@@ -325,85 +355,91 @@ export const styles = StyleSheet.create({
     marginRight: 5,
   },
   upcomingEventList: {
-    marginTop: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    flexWrap: 'wrap',
-    gap: 15,
+    marginTop: 10, 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    flexWrap: 'wrap', 
+    gap: 10, 
   },
-
+  
   upcomingEventContainer: {
-    marginTop: 20,
-    paddingVertical: 10,
+    marginTop: 15, 
+    paddingVertical: 8, 
   },
-
+  
   upcomingEvent: {
-    width: 180,
-    marginHorizontal: 10,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
+    width: 150, 
+    height: 270, 
+    marginRight: 10, 
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.5,
-    elevation: 5,
-    padding: 10,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+    padding: 10, 
+    justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden',
   },
-
+  
   upcomingEventImage: {
     width: '100%',
-    height: 150,
+    height: 160, 
     resizeMode: 'cover',
-    borderRadius: 8,
-    marginBottom: 10,
+    borderRadius: 12,
   },
-
+  
   upcomingEventTitle: {
-    fontSize: 16,
+    fontSize: 18, 
     fontWeight: 'bold',
-    textAlign: 'center',
+    fontFamily: 'Arial, sans-serif',
     color: '#333',
+    textAlign: 'center',
+    marginBottom: 8, 
   },
 
   upcomingEventTimeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 8,
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    marginTop: 5, 
+    marginBottom: 5, 
   },
-
-  upcomingEventTime: {
-    fontSize: 14,
-    marginLeft: 5,
-    color: '#FF6347',
-    fontWeight: 'bold',
-  },
-
+  
   timeIcon: {
     color: '#FF6347',
+    fontSize: 16, 
     marginRight: 5,
+    marginBottom: 2,
   },
-
-
+  
+  upcomingEventTime: {
+    fontSize: 14, 
+    marginLeft: 5, 
+    color: '#FF6347', 
+    fontWeight: 'bold', 
+  },
+  
+  
   upcomingEventDetails: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    alignItems: 'center',
+    paddingHorizontal: 8, 
+    paddingVertical: 5, 
+    alignItems: 'center', 
   },
-
+  
   lastTicketsSection: {
-    marginBottom: 20,
+    marginBottom: 15, 
   },
-
+  
   lastTicketsSectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 10,
-    paddingLeft: 10,
+    paddingLeft: 10, 
   },
-
+  
   eventBannerItem: {
     marginRight: 15,
     alignItems: 'center',
@@ -428,11 +464,8 @@ export const styles = StyleSheet.create({
     marginTop: 5,
     fontWeight: 'bold',
   },
-  culturalEventLocation: {
-    color: '#888',
-    fontSize: 12,
-    marginTop: 5,
-  },
+
+ 
   logoContainer: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -445,5 +478,6 @@ export const styles = StyleSheet.create({
     height: 150,
     resizeMode: 'contain',
   },
-
 });
+
+export default styles;
