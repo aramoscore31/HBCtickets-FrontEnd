@@ -16,6 +16,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../app/index';
 import Header from '../components/Header';
+import URL_BACK from '../config/urlBack';
 
 type NavigationProps = StackNavigationProp<RootStackParamList, 'CreateEvent'>;
 
@@ -60,7 +61,7 @@ const CreateEventScreen = ({ navigation }: { navigation: NavigationProps }) => {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('http://192.168.1.87:8080/api/categories');
+      const response = await fetch(`${URL_BACK}/api/categories`);
       const data = await response.json();
       setCategories(data);
     } catch (error) {
@@ -133,7 +134,7 @@ const CreateEventScreen = ({ navigation }: { navigation: NavigationProps }) => {
     }
 
     try {
-      const response = await fetch('http://192.168.1.87:8080/api/events/create', {
+      const response = await fetch(`${URL_BACK}/api/events/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'multipart/form-data',

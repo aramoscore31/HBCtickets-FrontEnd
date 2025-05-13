@@ -1,4 +1,4 @@
- import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, ActivityIndicator, Image, TouchableOpacity, Modal } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -9,6 +9,7 @@ import { ComingSoonStyles } from '../css/ComingSoonStyles';
 import { RootStackParamList } from '../../app/index';
 import Header from '../components/Header';
 import BottomNav from '../components/BottomNav';
+import URL_BACK from '../config/urlBack';
 
 const BoughtTickets = () => {
   const [tickets, setTickets] = useState<any[]>([]);  
@@ -32,7 +33,7 @@ const BoughtTickets = () => {
         return;
       }
 
-      const response = await fetch('http://192.168.1.87:8080/api/tickets/view', {
+      const response = await fetch(`${URL_BACK}/api/tickets/view`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -42,7 +43,7 @@ const BoughtTickets = () => {
 
       const data = await response.json();
       const updatedTickets = await Promise.all(data.map(async (ticket: { eventId: number, quantity: number }) => {
-        const eventResponse = await fetch(`http://192.168.1.87:8080/api/events/${ticket.eventId}`, {
+        const eventResponse = await fetch(`${URL_BACK}/api/events/${ticket.eventId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -144,7 +145,7 @@ const BoughtTickets = () => {
               <View style={[ComingSoonStyles.event, isPastEvent && { backgroundColor: '#e0e0e0' }]}>
                 <View style={ComingSoonStyles.eventImageContainer}>
                   <Image
-                    source={{ uri: `http://192.168.1.87:8080/uploaded-images/${event?.imageUrl || 'default-image.jpg'}` }}
+                    source={{ uri: `${URL_BACK}/uploaded-images/${event?.imageUrl || 'default-image.jpg'}` }}
                     style={ComingSoonStyles.eventImage}
                   />
                 </View>

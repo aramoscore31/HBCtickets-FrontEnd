@@ -20,6 +20,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import BottomNav from '../components/BottomNav';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import URL_BACK from '../config/urlBack';
+
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -77,7 +79,7 @@ const HomeScreen = () => {
   // Fetch events and categories
   const fetchEvents = async () => {
     try {
-      const response = await fetch('http://192.168.1.87:8080/api/events/filter/bypopular');
+      const response = await fetch(`${URL_BACK}/api/events/filter/bypopular`);
       if (!response.ok) throw new Error('No se pudieron obtener los eventos.');
 
       const data: EventData[] = await response.json();
@@ -101,7 +103,7 @@ const HomeScreen = () => {
 
   const fetchUpcomingEvents = async () => {
     try {
-      const response = await fetch('http://192.168.1.87:8080/api/events/filter/bydate');
+      const response = await fetch(`${URL_BACK}/api/events/filter/bydate`);
       if (!response.ok) throw new Error('No se pudieron obtener los eventos próximos.');
       const data: EventData[] = await response.json();
 
@@ -211,7 +213,7 @@ const HomeScreen = () => {
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.event} onPress={handleEventPress(item)}>
             <Image
-              source={{ uri: `http://192.168.1.87:8080/uploaded-images/${item.imageUrl}` }}
+              source={{ uri: `${URL_BACK}/uploaded-images/${item.imageUrl}` }}
               style={styles.eventImage}
             />
           </TouchableOpacity>
@@ -230,7 +232,7 @@ const HomeScreen = () => {
                   <Animated.View style={[styles.upcomingEvent, { opacity }]}>
                     <Image
                       source={{
-                        uri: `http://192.168.1.87:8080/uploaded-images/${item.imageUrl}`,
+                        uri: `${URL_BACK}/uploaded-images/${item.imageUrl}`,
                       }}
                       style={styles.upcomingEventImage}
                     />
@@ -253,7 +255,7 @@ const HomeScreen = () => {
               renderItem={({ item }) => (
                 <TouchableOpacity style={styles.upcomingEvent} onPress={handleEventPress(item)}>
                   <Image
-                    source={{ uri: `http://192.168.1.87:8080/uploaded-images/${item.imageUrl}` }}
+                    source={{ uri: `${URL_BACK}/uploaded-images/${item.imageUrl}` }}
                     style={styles.upcomingEventImage}
                   />
                   <Text style={styles.upcomingEventTitle}>{item.title}</Text>
@@ -275,7 +277,7 @@ const HomeScreen = () => {
                 <TouchableOpacity style={styles.upcomingEvent} onPress={handleEventPress(item)}>
                   <Image
                     source={{
-                      uri: `http://192.168.1.87:8080/uploaded-images/${item.imageUrl}`,
+                      uri: `${URL_BACK}/uploaded-images/${item.imageUrl}`,
                     }}
                     style={styles.upcomingEventImage}
                   />

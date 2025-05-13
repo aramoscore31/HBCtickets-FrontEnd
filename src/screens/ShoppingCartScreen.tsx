@@ -6,6 +6,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import BottomNav from '../components/BottomNav';
 import { RootStackParamList } from '../../app/index';
 import Header from '../components/Header';
+import URL_BACK from '../config/urlBack';
 
 interface CartItem {
   eventId: number;
@@ -46,9 +47,9 @@ const CartView = () => {
       Alert.alert("Error", "No se ha encontrado el token de autenticación.");
       return;
     }
-    setLoading(true); // Empezar a cargar
+    setLoading(true);
     try {
-      const response = await fetch('http://192.168.1.87:8080/api/events/cart/view', {
+      const response = await fetch(`${URL_BACK}/api/events/cart/view`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -59,7 +60,7 @@ const CartView = () => {
       if (response.ok) {
         const data = await response.json();
         const cartWithDetails = await Promise.all(data.map(async (item: { eventId: number, quantity: number }) => {
-          const eventResponse = await fetch(`http://192.168.1.87:8080/api/events/${item.eventId}`, {
+          const eventResponse = await fetch(`${URL_BACK}/api/events/${item.eventId}`, {
             method: 'GET',
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -113,7 +114,7 @@ const CartView = () => {
           text: "Eliminar",
           onPress: async () => {
             try {
-              const response = await fetch(`http://192.168.1.87:8080/api/events/cart/remove/${eventId}`, {
+              const response = await fetch(`${URL_BACK}/api/events/cart/remove/${eventId}`, {
                 method: 'POST',
                 headers: {
                   'Authorization': `Bearer ${token}`,
@@ -146,7 +147,7 @@ const CartView = () => {
         }
 
         try {
-          const response = await fetch(`http://192.168.1.87:8080/api/events/cart/update/${eventId}?quantity=${item.quantity}`, {
+          const response = await fetch(`${URL_BACK}/api/events/cart/update/${eventId}?quantity=${item.quantity}`, {
             method: 'PUT',
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -201,7 +202,7 @@ const CartView = () => {
     }
 
     try {
-      const response = await fetch('http://192.168.1.87:8080/api/purchases/checkout', {
+      const response = await fetch(`${URL_BACK}/api/purchases/checkout`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -241,7 +242,7 @@ const CartView = () => {
           renderItem={({ item }) => (
             <View style={styles.cartItem}>
               <Image
-                source={{ uri: `http://192.168.1.87:8080/uploaded-images/${item.event.imageUrl}` }}
+                source={{ uri: `${URL_BACK}/uploaded-images/${item.event.imageUrl}` }}
                 style={styles.image}
               />
               <View style={styles.itemDetails}>

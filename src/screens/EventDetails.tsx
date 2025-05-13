@@ -22,6 +22,9 @@ import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import BottomNav from '../components/BottomNav';
 import Footer from '../components/Footer';
+import {  Platform } from 'react-native';
+import URL_BACK from '../config/urlBack';
+
 
 type Category = {
   id: string;
@@ -49,11 +52,10 @@ const EventDetails = ({ route }: any) => {
 
   const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'Home'>>();
 
-  // Verificar si el evento está en favoritos
   const checkFavoriteStatus = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
-      const response = await fetch('http://192.168.1.87:8080/api/events/favorites/list', {
+      const response = await fetch(`${URL_BACK}/api/events/favorites/list`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -69,13 +71,12 @@ const EventDetails = ({ route }: any) => {
     }
   };
 
-  // Manejar la adición al carrito
   const handleAddToCart = async () => {
     const token = await AsyncStorage.getItem('token');
     const cantidad = 1;
 
     try {
-      const response = await fetch(`http://192.168.1.87:8080/api/events/cart/add/${event.id}/${cantidad}`, {
+      const response = await fetch(`${URL_BACK}/api/events/cart/add/${event.id}/${cantidad}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -84,7 +85,6 @@ const EventDetails = ({ route }: any) => {
       });
 
       if (response.ok) {
-        // Navegar a la pantalla del carrito después de agregar
         navigation.navigate('ShoppingCart');
       } else if (response.status === 401) {
         Alert.alert('Error', 'Sesión expirada. Por favor, inicia sesión de nuevo.');
@@ -99,11 +99,10 @@ const EventDetails = ({ route }: any) => {
     }
   };
 
-  // Manejar la adición a favoritos
   const handleAddFavorite = async () => {
     const token = await AsyncStorage.getItem('token');
     try {
-      const response = await fetch(`http://192.168.1.87:8080/api/events/favorites/add/${event.id}`, {
+      const response = await fetch(`${URL_BACK}/api/events/favorites/add/${event.id}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -121,11 +120,10 @@ const EventDetails = ({ route }: any) => {
     }
   };
 
-  // Manejar la eliminación de favoritos
   const handleRemoveFavorite = async () => {
     const token = await AsyncStorage.getItem('token');
     try {
-      const response = await fetch(`http://192.168.1.87:8080/api/events/favorites/remove/${event.id}`, {
+      const response = await fetch(`${URL_BACK}/api/events/favorites/remove/${event.id}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -143,9 +141,8 @@ const EventDetails = ({ route }: any) => {
     }
   };
 
-  // Manejar el compartir el evento
   const handleShare = async () => {
-    const imageUrl = `http://192.168.1.87:8080/uploaded-images/${event.imageUrl}`;
+    const imageUrl = `${URL_BACK}/uploaded-images/${event.imageUrl}`;
     const eventUrl = `http://yourwebsite.com/event/${event.id}`;
 
     try {
@@ -168,22 +165,40 @@ const EventDetails = ({ route }: any) => {
     }
   };
 
-  // Abrir la ubicación en Google Maps
-  const handleOpenMap = () => {
-    const isCoordinates = /^[-+]?[0-9]*\.?[0-9]+,[-+]?[0-9]*\.?[0-9]+$/.test(event.localizacion);
+ const handleOpenMap = () => {
+  const loc = event.localizacion.trim();
+  const isCoordinates = /^[-+]?(\d+(\.\d+)?),\s*[-+]?(\d+(\.\d+)?)$/.test(loc);
+  let appUrl: string;
+  let webUrl: string;
 
-    let url;
-    if (isCoordinates) {
-      url = `https://www.google.com/maps?q=${event.localizacion}`;
+  if (isCoordinates) {
+    if (Platform.OS === 'ios') {
+      appUrl = `maps://maps.apple.com/?q=${loc}`;
     } else {
-      const localizacionEncoded = encodeURIComponent(event.localizacion);
-      url = `https://www.google.com/maps/search/?q=${localizacionEncoded}`;
+      appUrl = `geo:${loc}?q=${loc}`;
     }
+    webUrl = `https://www.google.com/maps/search/?api=1&query=${loc}`;
+  } else {
+    const query = encodeURIComponent(loc);
+    if (Platform.OS === 'ios') {
+      appUrl = `maps://?q=${query}`;
+    } else {
+      appUrl = `geo:0,0?q=${query}`;
+    }
+    webUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
+  }
 
-    Linking.openURL(url).catch((err) => console.error('Error al abrir Google Maps: ', err));
-  };
+  Linking.canOpenURL(appUrl)
+    .then(supported => {
+      if (supported) {
+        return Linking.openURL(appUrl);
+      } else {
+        return Linking.openURL(webUrl);
+      }
+    })
+    .catch(err => console.error('Error al abrir mapas:', err));
+};
 
-  // Cargar nombre de usuario
   useEffect(() => {
     checkFavoriteStatus();
   }, [event]);
@@ -195,7 +210,6 @@ const EventDetails = ({ route }: any) => {
     })();
   }, []);
 
-  // Cargar la vista si está cargando
   if (loading) {
     return (
       <ActivityIndicator
@@ -212,7 +226,7 @@ const EventDetails = ({ route }: any) => {
         <Header navigation={navigation} username={username || ''} />
         <View style={styles.eventContainer}>
           <Image
-            source={{ uri: `http://192.168.1.87:8080/uploaded-images/${event.imageUrl}` }}
+            source={{ uri: `${URL_BACK}/uploaded-images/${event.imageUrl}` }}
             style={styles.eventImage}
           />
 

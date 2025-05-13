@@ -33,7 +33,7 @@ const HelpScreen = () => {
   };
 
   const handleContactSupport = () => {
-    Linking.openURL('mailto:support@tusitio.com');
+    Linking.openURL('support.tickets@hbcavonni.com');
   };
 
   const handleVisitWebsite = () => {

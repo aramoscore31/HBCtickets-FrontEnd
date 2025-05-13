@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, ActivityIndicator, TouchableOpacity, Image } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator, Image, TouchableOpacity, Alert } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
-import { ComingSoonStyles } from '../css/ComingSoonStyles';
-import Header from '../components/Header';
-import BottomNav from '../components/BottomNav';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../app/index';
+import Header from '../components/Header';
+import BottomNav from '../components/BottomNav';
+import { ComingSoonStyles } from '../css/ComingSoonStyles';
+import URL_BACK from '../config/urlBack';
 
 interface Event {
   id: number;
@@ -40,7 +41,7 @@ const FavoritesScreen = () => {
   const [favorites, setFavorites] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'EventDetails'>>();
   const [username, setUsername] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
 
@@ -49,29 +50,23 @@ const FavoritesScreen = () => {
     setError(null);
     try {
       const token = await AsyncStorage.getItem('token');
-      const response = await fetch('http://192.168.1.87:8080/api/events/favorites/list', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const response = await fetch(`${URL_BACK}/api/events/favorites/list`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (!response.ok) throw new Error('Failed to load favorite events');
-
       const favoriteEventIds: number[] = await response.json();
 
-      const eventDetailsPromises = favoriteEventIds.map(async (eventId: number) => {
-        const eventResponse = await fetch(`http://192.168.1.87:8080/api/events/${eventId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        return eventResponse.json();
-      });
-
-      const eventsDetails: Event[] = await Promise.all(eventDetailsPromises);
-      setFavorites(eventsDetails);
-
-    } catch (error) {
+      const details = await Promise.all(
+        favoriteEventIds.map(async id => {
+          const res = await fetch(`${URL_BACK}/api/events/${id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          return (await res.json()) as Event;
+        })
+      );
+      setFavorites(details);
+    } catch (err) {
       setError('Error fetching your favorites. Please try again later.');
     } finally {
       setLoading(false);
@@ -79,40 +74,31 @@ const FavoritesScreen = () => {
   };
 
   const handleRemoveFavorite = async (eventId: number) => {
-    const updatedFavorites = favorites.filter((event) => event.id !== eventId);
-    setFavorites(updatedFavorites);
-
     try {
       const token = await AsyncStorage.getItem('token');
-      const response = await fetch(`http://192.168.1.87:8080/api/events/favorites/remove/${eventId}`, {
+      const response = await fetch(`${URL_BACK}/api/events/favorites/remove/${eventId}`, {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      if (!response.ok) throw new Error('Failed to remove favorite');
-    } catch (error) {
-      setError('Error removing favorite. Please try again later.');
-      setFavorites(favorites);
-    } finally {
-      fetchFavorites();
+      if (!response.ok) throw new Error();
+      setFavorites(prev => prev.filter(evt => evt.id !== eventId));
+    } catch {
+      Alert.alert('Error', 'No se pudo eliminar de favoritos.');
     }
   };
 
   useEffect(() => {
     fetchFavorites();
-    const getUserData = async () => {
-      const storedUsername = await AsyncStorage.getItem('username');
-      const storedRole = await AsyncStorage.getItem('role');
-      if (storedUsername) setUsername(storedUsername);
-      if (storedRole) setRole(storedRole);
-    };
-    getUserData();
+    (async () => {
+      const u = await AsyncStorage.getItem('username');
+      const r = await AsyncStorage.getItem('role');
+      if (u) setUsername(u);
+      if (r) setRole(r);
+    })();
   }, []);
 
   if (loading) {
-    return <ActivityIndicator size="large" color="#3498db" />;
+    return <ActivityIndicator size="large" color="#3498db" style={{ flex: 1 }} />;
   }
 
   return (
@@ -120,56 +106,65 @@ const FavoritesScreen = () => {
       <Header navigation={navigation} username={username || ''} />
 
       <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#3498db', padding: 15, marginBottom: 10, borderTopWidth: 1, borderTopColor: 'white' }}>
-        <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', textAlign: 'center', alignItems: 'center', textAlignVertical: 'center', flex: 1 }}>Mis Favoritos</Text>
+        <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', flex: 1, textAlign: 'center' }}>
+          Mis Favoritos
+        </Text>
       </View>
 
       {error && <Text style={{ color: 'red', textAlign: 'center', marginVertical: 10 }}>{error}</Text>}
 
       {favorites.length === 0 ? (
-        <Text style={{ color: 'white', textAlign: 'center', marginTop: 30 }}>No tienes eventos favoritos.</Text>
+        <Text style={{ color: 'white', textAlign: 'center', marginTop: 30 }}>
+          No tienes eventos favoritos.
+        </Text>
       ) : (
         <FlatList
           data={favorites}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={item => item.id.toString()}
           renderItem={({ item }) => {
             const formattedDate = formatDate(item.date);
             return (
-              <View style={ComingSoonStyles.event}>
-                <View style={ComingSoonStyles.eventImageContainer}>
-                  <Image
-                    source={{ uri: `http://192.168.1.87:8080/uploaded-images/${item.imageUrl}` }}
-                    style={ComingSoonStyles.eventImage}
-                  />
-                </View>
-                <View style={ComingSoonStyles.eventDetails}>
-                  <Text style={ComingSoonStyles.eventTitle}>{item.title}</Text>
-                  <View style={ComingSoonStyles.locationContainer}>
-                    <Text style={ComingSoonStyles.eventLocation}>
-                      {item.localizacion || 'Ubicación no disponible'}
-                    </Text>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('EventDetails', { event: item })}
+              >
+                <View style={ComingSoonStyles.event}>
+                  <View style={ComingSoonStyles.eventImageContainer}>
+                    <Image
+                      source={{ uri: `${URL_BACK}/uploaded-images/${item.imageUrl}` }}
+                      style={ComingSoonStyles.eventImage}
+                    />
                   </View>
-                  <View style={ComingSoonStyles.eventMeta}>
-                    <View style={ComingSoonStyles.dateContainer}>
-                      <FontAwesome name="calendar" size={12} color="red" />
-                      <Text style={ComingSoonStyles.eventDate}>{formattedDate}</Text>
+                  <View style={ComingSoonStyles.eventDetails}>
+                    <Text style={ComingSoonStyles.eventTitle}>{item.title}</Text>
+                    <View style={ComingSoonStyles.locationContainer}>
+                      <Text style={ComingSoonStyles.eventLocation}>
+                        {item.localizacion || 'Ubicación no disponible'}
+                      </Text>
                     </View>
-                    <View style={ComingSoonStyles.ticketsContainer}>
-                      <FontAwesome name="ticket" size={12} color="#3498db" />
-                      <Text style={ComingSoonStyles.eventTickets}>{item.availableTickets}</Text>
+                    <View style={ComingSoonStyles.eventMeta}>
+                      <View style={ComingSoonStyles.dateContainer}>
+                        <FontAwesome name="calendar" size={12} color="red" />
+                        <Text style={ComingSoonStyles.eventDate}>{formattedDate}</Text>
+                      </View>
+                      <View style={ComingSoonStyles.ticketsContainer}>
+                        <FontAwesome name="ticket" size={12} color="#3498db" />
+                        <Text style={ComingSoonStyles.eventTickets}>{item.availableTickets}</Text>
+                      </View>
                     </View>
                   </View>
+                  <TouchableOpacity
+                    onPress={() => handleRemoveFavorite(item.id)}
+                    style={ComingSoonStyles.favoriteIcon}
+                  >
+                    <FontAwesome name="star" size={25} color="gold" />
+                  </TouchableOpacity>
                 </View>
-                <TouchableOpacity
-                  onPress={() => handleRemoveFavorite(item.id)}
-                  style={ComingSoonStyles.favoriteIcon}
-                >
-                  <FontAwesome name="star" size={25} color={ComingSoonStyles.favoriteIconActive.color} />
-                </TouchableOpacity>
-              </View>
+              </TouchableOpacity>
             );
           }}
         />
       )}
+
       <BottomNav navigation={navigation} role={role || ''} />
     </View>
   );

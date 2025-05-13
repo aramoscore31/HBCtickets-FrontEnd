@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator,
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import URL_BACK from '../config/urlBack';
 
 type RootStackParamList = {
   EditEvent: { eventId: number };
@@ -37,7 +38,7 @@ const EditEventScreen = ({ route, navigation }: EditEventScreenProps) => {
     const fetchEvent = async () => {
       const token = await AsyncStorage.getItem('token');
       try {
-        const response = await fetch(`http://192.168.1.87:8080/api/events/${eventId}`, {
+        const response = await fetch(`${URL_BACK}/api/events/${eventId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -58,7 +59,7 @@ const EditEventScreen = ({ route, navigation }: EditEventScreenProps) => {
 
     const fetchCategories = async () => {
       try {
-        const response = await fetch('http://192.168.1.87:8080/api/categories');
+        const response = await fetch(`${URL_BACK}/api/categories`);
         const data = await response.json();
         setCategories(data);
       } catch (error) {
@@ -100,7 +101,7 @@ const EditEventScreen = ({ route, navigation }: EditEventScreenProps) => {
         formData.append('image', imageBlob as any);
       }
 
-      const response = await fetch(`http://192.168.1.87:8080/api/events/edit/${eventId}`, {
+      const response = await fetch(`${URL_BACK}/api/events/edit/${eventId}`, {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -146,7 +147,7 @@ const EditEventScreen = ({ route, navigation }: EditEventScreenProps) => {
     return <ActivityIndicator size="large" color="#3498db" />;
   }
 
-  const currentImageUrl = imageUri ? imageUri : `http://192.168.1.87:8080/uploaded-images/${eventData?.imageUrl}`;
+  const currentImageUrl = imageUri ? imageUri : `${URL_BACK}/uploaded-images/${eventData?.imageUrl}`;
 
   return (
     <ScrollView contentContainerStyle={styles.scrollViewContainer}>

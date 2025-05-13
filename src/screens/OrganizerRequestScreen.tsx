@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Alert, ScrollView, FlatList } 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { styles } from '../css/OrganizerRequestStyles';
 import { FontAwesome } from '@expo/vector-icons';
+import URL_BACK from '../config/urlBack';
 
 const OrganizerRequestScreen = ({ navigation }: any) => {
   const [username, setUsername] = useState('');
@@ -42,7 +43,7 @@ const OrganizerRequestScreen = ({ navigation }: any) => {
         return;
       }
 
-      const response = await fetch('http://192.168.1.87:8080/api/auth/request-organizer', {
+      const response = await fetch(`${URL_BACK}/api/auth/request-organizer`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

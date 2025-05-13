@@ -8,7 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CiudadStyles } from '../css/CiudadStyles';
 import { ComingSoonStyles } from '../css/ComingSoonStyles';
 import Header from '../components/Header';
-import BottomNav from '../components/BottomNav';
+import URL_BACK from '../config/urlBack';
 
 interface EventData {
   id: number;
@@ -27,7 +27,7 @@ const RecommendationsScreen = () => {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'Home'>>();
   const [localizacion, setLocalizacion] = useState('');
   const [events, setEvents] = useState<EventData[]>([]);
-  const [favorites, setFavorites] = useState<number[]>([]);  // Lista de eventos favoritos
+  const [favorites, setFavorites] = useState<number[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(false);
   const [showLocationTitle, setShowLocationTitle] = useState(false);
   const [noEventsMessage, setNoEventsMessage] = useState('');
@@ -35,11 +35,10 @@ const RecommendationsScreen = () => {
   const [role, setRole] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Fetch events from the server
   const fetchAllEvents = async () => {
     setLoadingEvents(true);
     try {
-      const response = await fetch('http://192.168.1.87:8080/api/events/filter/bydate');
+      const response = await fetch(`${URL_BACK}/api/events/filter/bydate`);
       if (response.ok) {
         const data: EventData[] = await response.json();
 
@@ -63,12 +62,10 @@ const RecommendationsScreen = () => {
     }
   };
 
-  // Navigate to event details screen
   const handleEventPress = (item: EventData) => {
     navigation.navigate('EventDetails', { event: item });
   };
 
-  // Fetch events filtered by location
   const fetchEventsByLocation = async (localization: string) => {
     setLoadingEvents(true);
     setShowLocationTitle(true);
@@ -76,7 +73,7 @@ const RecommendationsScreen = () => {
     setErrorMessage('');
     setLocalizacion(localization);
     try {
-      const response = await fetch(`http://192.168.1.87:8080/api/events/filter?localizacion=${localization}`);
+      const response = await fetch(`${URL_BACK}/api/events/filter?localizacion=${localization}`);
       if (response.ok) {
         const data: EventData[] = await response.json();
 
@@ -101,29 +98,27 @@ const RecommendationsScreen = () => {
     }
   };
 
-  // Fetch the favorites list from the backend
   const fetchFavorites = async () => {
     const token = await AsyncStorage.getItem('token');
     try {
-      const response = await fetch('http://192.168.1.87:8080/api/events/favorites/list', {
+      const response = await fetch(`${URL_BACK}/api/events/favorites/list`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       if (response.ok) {
         const data = await response.json();
-        setFavorites(data); // Set the IDs of favorite events
+        setFavorites(data);
       }
     } catch (error) {
       console.error('Error al obtener favoritos:', error);
     }
   };
 
-  // Add an event to favorites
   const handleAddFavorite = async (eventId: any) => {
     const token = await AsyncStorage.getItem('token');
     try {
-      const response = await fetch(`http://192.168.1.87:8080/api/events/favorites/add/${eventId}`, {
+      const response = await fetch(`${URL_BACK}/api/events/favorites/add/${eventId}`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
@@ -134,11 +129,10 @@ const RecommendationsScreen = () => {
     }
   };
 
-  // Remove an event from favorites
   const handleRemoveFavorite = async (eventId: any) => {
     const token = await AsyncStorage.getItem('token');
     try {
-      const response = await fetch(`http://192.168.1.87:8080/api/events/favorites/remove/${eventId}`, {
+      const response = await fetch(`${URL_BACK}/api/events/favorites/remove/${eventId}`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
@@ -149,7 +143,6 @@ const RecommendationsScreen = () => {
     }
   };
 
-  // Initialize user data
   useEffect(() => {
     const getUserData = async () => {
       const storedUsername = await AsyncStorage.getItem('username');
@@ -160,13 +153,11 @@ const RecommendationsScreen = () => {
     getUserData();
   }, []);
 
-  // Fetch the favorites and events when the screen is loaded
   useEffect(() => {
     fetchFavorites();
     fetchAllEvents();
   }, []);
 
-  // Format date in readable format
   const formatDate = (date: string) => {
     const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
     return new Date(date).toLocaleDateString('es-ES', options);
@@ -242,13 +233,13 @@ const RecommendationsScreen = () => {
             data={events}
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => {
-              const isFavorite = favorites.includes(item.id);  // Verifica si el evento está en los favoritos
+              const isFavorite = favorites.includes(item.id);
               return (
                 <TouchableOpacity onPress={() => handleEventPress(item)}>
                   <View style={CiudadStyles.event}>
                     <View style={CiudadStyles.eventImageContainer}>
                       <Image
-                        source={{ uri: `http://192.168.1.87:8080/uploaded-images/${item.imageUrl}` }}
+                        source={{ uri: `${URL_BACK}/uploaded-images/${item.imageUrl}` }}
                         style={CiudadStyles.eventImage}
                         resizeMode="cover"
                       />
@@ -274,9 +265,9 @@ const RecommendationsScreen = () => {
                     <TouchableOpacity
                       onPress={() => {
                         if (isFavorite) {
-                          handleRemoveFavorite(item.id);  // Eliminar de favoritos
+                          handleRemoveFavorite(item.id);
                         } else {
-                          handleAddFavorite(item.id);  // Agregar a favoritos
+                          handleAddFavorite(item.id);
                         }
                       }}
                       style={CiudadStyles.favoriteIcon}

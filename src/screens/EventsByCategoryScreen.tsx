@@ -3,6 +3,7 @@ import { View, Text, FlatList, ActivityIndicator, TouchableOpacity, Alert, Image
 import { CiudadStyles } from '../css/CiudadStyles';
 import { FontAwesome } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import URL_BACK from '../config/urlBack';
 
 const EventsByCategoryScreen = ({ route, navigation }: any) => {
   const { category } = route.params;
@@ -20,7 +21,7 @@ const EventsByCategoryScreen = ({ route, navigation }: any) => {
     setLoading(true);
     setNoEventsMessage('');
     try {
-      const response = await fetch(`http://192.168.1.87:8080/api/events/filter?category=${categoryId}`);
+      const response = await fetch(`${URL_BACK}/api/events/filter?category=${categoryId}`);
       if (response.ok) {
         const data = await response.json();
         if (data.length === 0) {
@@ -41,7 +42,7 @@ const EventsByCategoryScreen = ({ route, navigation }: any) => {
   const fetchFavorites = async () => {
     const token = await AsyncStorage.getItem('token');
     try {
-      const response = await fetch('http://192.168.1.87:8080/api/events/favorites/list', {
+      const response = await fetch(`${URL_BACK}/api/events/favorites/list`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -64,7 +65,7 @@ const EventsByCategoryScreen = ({ route, navigation }: any) => {
     }
 
     try {
-      const response = await fetch(`http://192.168.1.87:8080/api/events/favorites/add/${eventId}`, {
+      const response = await fetch(`${URL_BACK}/api/events/favorites/add/${eventId}`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
@@ -84,7 +85,7 @@ const EventsByCategoryScreen = ({ route, navigation }: any) => {
     }
 
     try {
-      const response = await fetch(`http://192.168.1.87:8080/api/events/favorites/remove/${eventId}`, {
+      const response = await fetch(`${URL_BACK}/api/events/favorites/remove/${eventId}`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
@@ -118,7 +119,7 @@ const EventsByCategoryScreen = ({ route, navigation }: any) => {
                 <View style={CiudadStyles.event}>
                   <View style={CiudadStyles.eventImageContainer}>
                     <Image
-                      source={{ uri: `http://192.168.1.87:8080/uploaded-images/${item.imageUrl}` }}
+                      source={{ uri: `${URL_BACK}/uploaded-images/${item.imageUrl}` }}
                       style={CiudadStyles.eventImage}
                       resizeMode="cover"
                     />

@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import URL_BACK from '../config/urlBack';
 
 const LoginScreen = ({ navigation }: any) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = () => {
-    fetch('http://192.168.1.87:8080/api/auth/login', {
+    fetch(`${URL_BACK}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),

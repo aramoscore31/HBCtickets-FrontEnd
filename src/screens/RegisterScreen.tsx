@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../../app/index';
 import { StackNavigationProp } from '@react-navigation/stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import URL_BACK from '../config/urlBack';
 
 type RegisterScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Register'>;
 
@@ -15,7 +16,7 @@ const RegisterScreen = () => {
 
   const handleRegister = async () => {
     try {
-      const registerResponse = await fetch('http://192.168.1.87:8080/api/auth/register', {
+      const registerResponse = await fetch(`${URL_BACK}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -34,7 +35,7 @@ const RegisterScreen = () => {
       console.log(registerMessage);
 
       if (registerMessage.includes("Usuario registrado exitosamente")) {
-        const loginResponse = await fetch('http://192.168.1.87:8080/api/auth/login', {
+        const loginResponse = await fetch(`${URL_BACK}/api/auth/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

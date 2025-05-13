@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RootStackParamList } from '../../app/index';
 import { styles } from '../css/ProfileSyles';
 import BottomNav from '../components/BottomNav';
+import URL_BACK from '../config/urlBack';
 
 type ProfileScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Profile'>;
 
@@ -41,7 +42,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
     const getUserData = async (token: string) => {
         try {
-            const response = await fetch('http://192.168.1.87:8080/api/auth/profile/me', {
+            const response = await fetch(`${URL_BACK}/api/auth/profile/me`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -95,7 +96,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                                 throw new Error('No token found');
                             }
 
-                            const response = await fetch('http://192.168.1.87:8080/api/auth/selfdelete', {
+                            const response = await fetch(`${URL_BACK}/api/auth/selfdelete`, {
                                 method: 'DELETE',
                                 headers: {
                                     'Authorization': `Bearer ${token}`,
@@ -144,7 +145,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                 return;
             }
 
-            const response = await fetch('http://192.168.1.87:8080/api/auth/update-password', {
+            const response = await fetch(`${URL_BACK}/api/auth/update-password`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

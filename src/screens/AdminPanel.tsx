@@ -5,6 +5,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { ComingSoonStyles } from '../css/ComingSoonStyles';
 import Header from '../components/Header';
 import BottomNav from '../components/BottomNav';
+import URL_BACK from '../config/urlBack';
 
 const AdminPanel = ({ navigation }) => {
   const [events, setEvents] = useState([]);
@@ -18,7 +19,7 @@ const AdminPanel = ({ navigation }) => {
       setLoading(true);
       const token = await AsyncStorage.getItem('token');
       try {
-        const response = await fetch('http://192.168.1.87:8080/api/events/admin/panel', {
+        const response = await fetch(`${URL_BACK}/api/events/admin/panel`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -53,7 +54,7 @@ const AdminPanel = ({ navigation }) => {
   const handleDeleteEvent = async (eventId: number) => {
     const token = await AsyncStorage.getItem('token');
     try {
-      const response = await fetch(`http://192.168.1.87:8080/api/events/delete/${eventId}`, {
+      const response = await fetch(`${URL_BACK}/api/events/delete/${eventId}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -90,7 +91,7 @@ const AdminPanel = ({ navigation }) => {
             <View style={ComingSoonStyles.event}>
               <View style={ComingSoonStyles.eventImageContainer}>
                 <Image
-                  source={{ uri: `http://192.168.1.87:8080/uploaded-images/${item.imageUrl}` }}
+                  source={{ uri: `${URL_BACK}/uploaded-images/${item.imageUrl}` }}
                   style={ComingSoonStyles.eventImage}
                 />
               </View>

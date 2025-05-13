@@ -4,7 +4,7 @@
     "slug": "HBCtickets",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./src/assets/logo.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -13,7 +13,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./src/assets/logo.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.anonymous.HBCtickets"
@@ -21,7 +21,7 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./src/assets/logo.png"
     },
     "plugins": [
       "expo-router",

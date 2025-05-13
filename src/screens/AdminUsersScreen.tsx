@@ -6,6 +6,7 @@ import { RootStackParamList } from '../../app/index';
 import { styles } from '../css/AdminDashboardStyles';
 import Header from '../components/Header';
 import { FontAwesome } from '@expo/vector-icons';
+import URL_BACK from '../config/urlBack';
 
 type NavigationProps = StackNavigationProp<RootStackParamList, 'Admin'>;
 
@@ -34,7 +35,7 @@ const AdminUsersScreen = ({ navigation }: any) => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://192.168.1.87:8080/api/auth/profile/all', {
+      const response = await fetch(`${URL_BACK}/api/auth/profile/all`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -77,7 +78,7 @@ const AdminUsersScreen = ({ navigation }: any) => {
     setLoading(true);
 
     try {
-      const response = await fetch(`http://192.168.1.87:8080/api/auth/profile/${userId}`, {
+      const response = await fetch(`${URL_BACK}/api/auth/profile/${userId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -112,7 +113,7 @@ const AdminUsersScreen = ({ navigation }: any) => {
     setLoading(true);
 
     try {
-      const response = await fetch(`http://192.168.1.87:8080/api/auth/update/${editingUserId}`, {
+      const response = await fetch(`${URL_BACK}/api/auth/update/${editingUserId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

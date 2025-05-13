@@ -9,8 +9,8 @@ import { ComingSoonStyles } from '../css/ComingSoonStyles';
 import Header from '../components/Header';
 import BottomNav from '../components/BottomNav';
 import { RootStackParamList } from '../../app/index';
+import URL_BACK from '../config/urlBack';
 
-// Definir la interfaz de tipo EventData para los eventos
 interface EventData {
   id: string;
   title: string;
@@ -24,7 +24,6 @@ interface EventData {
   categories: { name: string }[];
 }
 
-// Formatear la fecha
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   const options: Intl.DateTimeFormatOptions = {
@@ -38,27 +37,25 @@ const formatDate = (dateString: string) => {
 };
 
 const ComingSoonScreen = () => {
-  const [favorites, setFavorites] = useState<string[]>([]);  // List of favorite event ids
-  const [events, setEvents] = useState<EventData[]>([]);  // List of events
-  const [loading, setLoading] = useState(true);  // Loading state
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [events, setEvents] = useState<EventData[]>([]);
+  const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState<string | null>(null);
   const [role, setRole] = useState<string | null>(null);
 
   const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'Home'>>();
 
-  // Fetch events from API
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://192.168.1.87:8080/api/events/filter/bydate');
+      const response = await fetch(`${URL_BACK}/api/events/filter/bydate`);
       if (!response.ok) throw new Error('No se pudieron obtener los eventos.');
       const data: EventData[] = await response.json();
 
-      // Filtrar eventos que están en curso (la fecha del evento debe ser posterior a la fecha actual)
       const currentDate = new Date();
       const upcomingEvents = data.filter((event) => new Date(event.date) > currentDate);
 
-      setEvents(upcomingEvents); // Solo eventos en curso
+      setEvents(upcomingEvents);
     } catch (err) {
       console.error('Error al obtener eventos:', err);
     } finally {
@@ -66,25 +63,23 @@ const ComingSoonScreen = () => {
     }
   };
 
-  // Fetch favorites
   const fetchFavorites = async () => {
     const token = await AsyncStorage.getItem('token');
     try {
-      const response = await fetch('http://192.168.1.87:8080/api/events/favorites/list', {
+      const response = await fetch(`${URL_BACK}/api/events/favorites/list`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       if (response.ok) {
         const data = await response.json();
-        setFavorites(data);  // Store event IDs that are favorites
+        setFavorites(data);
       }
     } catch (error) {
       console.error('Error al obtener favoritos:', error);
     }
   };
 
-  // Add event to favorites
   const handleAddFavorite = async (eventId: string) => {
     const token = await AsyncStorage.getItem('token');
     if (!token) {
@@ -94,7 +89,7 @@ const ComingSoonScreen = () => {
     }
 
     try {
-      const response = await fetch(`http://192.168.1.87:8080/api/events/favorites/add/${eventId}`, {
+      const response = await fetch(`${URL_BACK}/api/events/favorites/add/${eventId}`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
@@ -107,7 +102,6 @@ const ComingSoonScreen = () => {
     }
   };
 
-  // Remove event from favorites
   const handleRemoveFavorite = async (eventId: string) => {
     const token = await AsyncStorage.getItem('token');
     if (!token) {
@@ -117,7 +111,7 @@ const ComingSoonScreen = () => {
     }
 
     try {
-      const response = await fetch(`http://192.168.1.87:8080/api/events/favorites/remove/${eventId}`, {
+      const response = await fetch(`${URL_BACK}/api/events/favorites/remove/${eventId}`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
@@ -130,9 +124,8 @@ const ComingSoonScreen = () => {
     }
   };
 
-  // Navigate to event details
   const handleEventPress = (item: EventData) => {
-    navigation.navigate('EventDetails', { event: item }); // Navegar a la pantalla de detalles del evento
+    navigation.navigate('EventDetails', { event: item });
   };
 
   useFocusEffect(
@@ -162,19 +155,19 @@ const ComingSoonScreen = () => {
 
       <Text style={ComingSoonStyles.sectionTitle}>Eventos Próximos</Text>
       <FlatList
-        data={events} // Solo muestra los eventos en curso
+        data={events}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => {
           const isFavorite = favorites.includes(item.id);
           const formattedDate = formatDate(item.date);
           return (
             <TouchableOpacity
-              onPress={() => handleEventPress(item)} // Navegar al detalle del evento
+              onPress={() => handleEventPress(item)}
               style={ComingSoonStyles.event}
             >
               <View style={ComingSoonStyles.eventImageContainer}>
                 <Image
-                  source={{ uri: `http://192.168.1.87:8080/uploaded-images/${item.imageUrl}` }}
+                  source={{ uri: `${URL_BACK}/uploaded-images/${item.imageUrl}` }}
                   style={ComingSoonStyles.eventImage}
                 />
               </View>
@@ -207,7 +200,7 @@ const ComingSoonScreen = () => {
                 <FontAwesome
                   name="star"
                   size={25}
-                  color={isFavorite ? 'gold' : 'gray'}  // Star color based on favorite status
+                  color={isFavorite ? 'gold' : 'gray'}
                 />
               </TouchableOpacity>
             </TouchableOpacity>
