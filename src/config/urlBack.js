@@ -1,3 +1,3 @@
-const URL_BACK = "http://192.168.1.87:8080";
+const URL_BACK = "http://54.160.243.81:8080";
 
 export default URL_BACK;
