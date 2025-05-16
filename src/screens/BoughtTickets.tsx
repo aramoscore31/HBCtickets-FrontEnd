@@ -145,7 +145,7 @@ const BoughtTickets = () => {
               <View style={[ComingSoonStyles.event, isPastEvent && { backgroundColor: '#e0e0e0' }]}>
                 <View style={ComingSoonStyles.eventImageContainer}>
                   <Image
-                    source={{ uri: `${URL_BACK}/uploaded-images/${event?.imageUrl || 'default-image.jpg'}` }}
+                    source={{ uri: `${event?.imageUrl || 'default-image.jpg'}` }}
                     style={ComingSoonStyles.eventImage}
                   />
                 </View>

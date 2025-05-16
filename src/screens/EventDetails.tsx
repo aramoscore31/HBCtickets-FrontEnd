@@ -142,7 +142,7 @@ const EventDetails = ({ route }: any) => {
   };
 
   const handleShare = async () => {
-    const imageUrl = `${URL_BACK}/uploaded-images/${event.imageUrl}`;
+    const imageUrl = `${event.imageUrl}`;
     const eventUrl = `http://yourwebsite.com/event/${event.id}`;
 
     try {
@@ -226,7 +226,7 @@ const EventDetails = ({ route }: any) => {
         <Header navigation={navigation} username={username || ''} />
         <View style={styles.eventContainer}>
           <Image
-            source={{ uri: `${URL_BACK}/uploaded-images/${event.imageUrl}` }}
+            source={{ uri: `${event.imageUrl}` }}
             style={styles.eventImage}
           />
 

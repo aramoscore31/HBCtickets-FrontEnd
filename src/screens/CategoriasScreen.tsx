@@ -256,7 +256,7 @@ const CategoriasScreen = () => {
                   <View style={ComingSoonStyles.eventImageContainer}>
                     <Image
                       source={{
-                        uri: `${URL_BACK}/uploaded-images/${item.imageUrl}`,
+                        uri: `${item.imageUrl}`,
                       }}
                       style={ComingSoonStyles.eventImage}
                     />

@@ -147,7 +147,7 @@ const EditEventScreen = ({ route, navigation }: EditEventScreenProps) => {
     return <ActivityIndicator size="large" color="#3498db" />;
   }
 
-  const currentImageUrl = imageUri ? imageUri : `${URL_BACK}/uploaded-images/${eventData?.imageUrl}`;
+  const currentImageUrl = imageUri ? imageUri : `${eventData?.imageUrl}`;
 
   return (
     <ScrollView contentContainerStyle={styles.scrollViewContainer}>

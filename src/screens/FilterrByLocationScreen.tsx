@@ -239,7 +239,7 @@ const RecommendationsScreen = () => {
                   <View style={CiudadStyles.event}>
                     <View style={CiudadStyles.eventImageContainer}>
                       <Image
-                        source={{ uri: `${URL_BACK}/uploaded-images/${item.imageUrl}` }}
+                        source={{ uri: `${item.imageUrl}` }}
                         style={CiudadStyles.eventImage}
                         resizeMode="cover"
                       />

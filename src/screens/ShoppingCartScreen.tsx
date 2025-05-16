@@ -242,7 +242,7 @@ const CartView = () => {
           renderItem={({ item }) => (
             <View style={styles.cartItem}>
               <Image
-                source={{ uri: `${URL_BACK}/uploaded-images/${item.event.imageUrl}` }}
+                source={{ uri: `${item.event.imageUrl}` }}
                 style={styles.image}
               />
               <View style={styles.itemDetails}>

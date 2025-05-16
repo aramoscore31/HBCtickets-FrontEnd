@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Image, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -45,6 +45,20 @@ const ComingSoonScreen = () => {
 
   const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'Home'>>();
 
+  // Unifica añadir/quitar favorito y redirige al Login si no hay sesión o token caducado
+  const handleToggleFavorite = async (eventId: string) => {
+    const token = await AsyncStorage.getItem('token');
+    if (!token) {
+      navigation.navigate('Login');
+      return;
+    }
+    if (favorites.includes(eventId)) {
+      await handleRemoveFavorite(eventId);
+    } else {
+      await handleAddFavorite(eventId);
+    }
+  };
+
   const fetchEvents = async () => {
     setLoading(true);
     try {
@@ -67,10 +81,13 @@ const ComingSoonScreen = () => {
     const token = await AsyncStorage.getItem('token');
     try {
       const response = await fetch(`${URL_BACK}/api/events/favorites/list`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
+      if (response.status === 401) {
+        // Token inválido o caducado
+        navigation.navigate('Login');
+        return;
+      }
       if (response.ok) {
         const data = await response.json();
         setFavorites(data);
@@ -81,21 +98,20 @@ const ComingSoonScreen = () => {
   };
 
   const handleAddFavorite = async (eventId: string) => {
-    const token = await AsyncStorage.getItem('token');
-    if (!token) {
-      Alert.alert('Error', 'No estás logueado. Por favor, inicia sesión.');
-      navigation.navigate('Login');
-      return;
-    }
-
     try {
+      const token = await AsyncStorage.getItem('token');
       const response = await fetch(`${URL_BACK}/api/events/favorites/add/${eventId}`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
+      if (response.status === 401) {
+        // Token inválido o caducado
+        navigation.navigate('Login');
+        return;
+      }
       if (!response.ok) throw new Error('Failed to add favorite');
 
-      setFavorites((prevFavorites) => [...prevFavorites, eventId]);
+      setFavorites((prev) => [...prev, eventId]);
       fetchFavorites();
     } catch (err) {
       console.error('Error al agregar a favoritos:', err);
@@ -103,21 +119,20 @@ const ComingSoonScreen = () => {
   };
 
   const handleRemoveFavorite = async (eventId: string) => {
-    const token = await AsyncStorage.getItem('token');
-    if (!token) {
-      Alert.alert('Error', 'No estás logueado. Por favor, inicia sesión.');
-      navigation.navigate('Login');
-      return;
-    }
-
     try {
+      const token = await AsyncStorage.getItem('token');
       const response = await fetch(`${URL_BACK}/api/events/favorites/remove/${eventId}`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       });
+      if (response.status === 401) {
+        // Token inválido o caducado
+        navigation.navigate('Login');
+        return;
+      }
       if (!response.ok) throw new Error('Failed to remove favorite');
 
-      setFavorites((prevFavorites) => prevFavorites.filter((id) => id !== eventId));
+      setFavorites((prev) => prev.filter((id) => id !== eventId));
       fetchFavorites();
     } catch (err) {
       console.error('Error al eliminar de favoritos:', err);
@@ -188,20 +203,10 @@ const ComingSoonScreen = () => {
                 </View>
               </View>
               <TouchableOpacity
-                onPress={() => {
-                  if (isFavorite) {
-                    handleRemoveFavorite(item.id);
-                  } else {
-                    handleAddFavorite(item.id);
-                  }
-                }}
+                onPress={() => handleToggleFavorite(item.id)}
                 style={ComingSoonStyles.favoriteIcon}
               >
-                <FontAwesome
-                  name="star"
-                  size={25}
-                  color={isFavorite ? 'gold' : 'gray'}
-                />
+                <FontAwesome name="star" size={25} color={isFavorite ? 'gold' : 'gray'} />
               </TouchableOpacity>
             </TouchableOpacity>
           );

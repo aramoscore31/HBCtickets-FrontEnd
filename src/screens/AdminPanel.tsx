@@ -91,7 +91,7 @@ const AdminPanel = ({ navigation }) => {
             <View style={ComingSoonStyles.event}>
               <View style={ComingSoonStyles.eventImageContainer}>
                 <Image
-                  source={{ uri: `${URL_BACK}/uploaded-images/${item.imageUrl}` }}
+                  source={{ uri: `${item.imageUrl}` }}
                   style={ComingSoonStyles.eventImage}
                 />
               </View>

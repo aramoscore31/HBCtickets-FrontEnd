@@ -76,7 +76,6 @@ const HomeScreen = () => {
 
   const opacity = useState(new Animated.Value(1))[0];
 
-  // Fetch events and categories
   const fetchEvents = async () => {
     try {
       const response = await fetch(`${URL_BACK}/api/events/filter/bypopular`);
@@ -92,7 +91,7 @@ const HomeScreen = () => {
       const culturalEvents = upcomingEvents.filter(event => event.categories.some(cat => cat.name.toLowerCase() === 'cultura'));
       setCulturalEvents(culturalEvents);
 
-      const lastTickets = upcomingEvents.filter(event => event.availableTickets < 100);
+      const lastTickets = upcomingEvents.filter(event => event.availableTickets <= 100);
       setLastTicketsEvents(lastTickets);
     } catch (err) {
       console.error('Error al obtener eventos:', err);
@@ -213,7 +212,7 @@ const HomeScreen = () => {
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.event} onPress={handleEventPress(item)}>
             <Image
-              source={{ uri: `${URL_BACK}/uploaded-images/${item.imageUrl}` }}
+              source={{ uri: `${item.imageUrl}` }}
               style={styles.eventImage}
             />
           </TouchableOpacity>
@@ -228,11 +227,10 @@ const HomeScreen = () => {
               showsHorizontalScrollIndicator={false}
               renderItem={({ item }) => (
                 <TouchableOpacity style={styles.upcomingEvent} onPress={handleEventPress(item)}>
-                  {/* Apply the blinking animation here */}
                   <Animated.View style={[styles.upcomingEvent, { opacity }]}>
                     <Image
                       source={{
-                        uri: `${URL_BACK}/uploaded-images/${item.imageUrl}`,
+                        uri: `${item.imageUrl}`,
                       }}
                       style={styles.upcomingEventImage}
                     />
@@ -255,36 +253,13 @@ const HomeScreen = () => {
               renderItem={({ item }) => (
                 <TouchableOpacity style={styles.upcomingEvent} onPress={handleEventPress(item)}>
                   <Image
-                    source={{ uri: `${URL_BACK}/uploaded-images/${item.imageUrl}` }}
+                    source={{ uri: `${item.imageUrl}` }}
                     style={styles.upcomingEventImage}
                   />
                   <Text style={styles.upcomingEventTitle}>{item.title}</Text>
                   <View style={styles.upcomingEventTimeContainer}>
                     <FontAwesome name="clock-o" size={16} color="#FF6347" />
                     <Text style={styles.upcomingEventTime}>{formatEventTime(item.date)}</Text>
-                  </View>
-                </TouchableOpacity>
-              )}
-            />
-
-            <Text style={styles.sectionTitle}>Cultura</Text>
-            <FlatList
-              data={culturalEvents}
-              keyExtractor={(item) => item.id}
-              horizontal={true}
-              showsHorizontalScrollIndicator={false}
-              renderItem={({ item }) => (
-                <TouchableOpacity style={styles.upcomingEvent} onPress={handleEventPress(item)}>
-                  <Image
-                    source={{
-                      uri: `${URL_BACK}/uploaded-images/${item.imageUrl}`,
-                    }}
-                    style={styles.upcomingEventImage}
-                  />
-                  <Text style={styles.upcomingEventTitle}>{item.title}</Text>
-                  <View style={styles.culturalEventLocation}>
-                    <FontAwesome name="map-marker" size={14} color="#888" style={styles.locationIcon} />
-                    <Text style={styles.culturalEventLocationText}>{item.localizacion}</Text>
                   </View>
                 </TouchableOpacity>
               )}
